@@ -10,15 +10,11 @@
         update_cache: yes
       when: ansible_distribution == "Ubuntu"
 
-    - name: install apache2 package
+    - name: install apache2 and php packages for Ubuntu
       apt:
-        name: apache2
-        state: latest
-      when: ansible_distribution == "Ubuntu"
-
-    - name: add php support for package
-      apt:
-        name: libapache2-mod-php
+        name: 
+          - apache2
+          - libapache2-mod-php
         state: latest
       when: ansible_distribution == "Ubuntu"
 
@@ -40,19 +36,12 @@
          - ansible_os_family == "RedHat" 
          - ansible_distribution == "CentOs"
 
-    - name: install apache2 package
+    - name: install apache2 and php packages for CentOs
       yum:
-        name: httpd
+        name: 
+          - httpd
+          - php
         state: latest
       when:
          - ansible_os_family == "RedHat"
          - ansible_distribution == "CentOs"
-
-    - name: add php support for package
-      yum:
-        name: php
-        state: latest
-      when:
-        - ansible_os_family == "RedHat" 
-        - ansible_distribution == "CentOs"
-
