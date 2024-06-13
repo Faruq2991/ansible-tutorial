@@ -8,14 +8,51 @@
     - name: update repository index
       apt: 
         update_cache: yes
+      when: ansible_distribution == "Ubuntu"
 
     - name: install apache2 package
       apt:
         name: apache2
         state: latest
+      when: ansible_distribution == "Ubuntu"
 
     - name: add php support for package
       apt:
         name: libapache2-mod-php
         state: latest
+      when: ansible_distribution == "Ubuntu"
+
+
+      #- name: Install apache2 for centos systems
+      #yum:
+              #name: httpd
+        #state: latest
+        #update_cache: yes
+       #cache_valid_time: 3600
+       #when:
+           #- ansible_os_family == "RedHat"
+          #- ansible_distribution == "CentOS"
+
+    - name: update repository index
+      dnf:
+        update_cache: yes
+      when:
+         - ansible_os_family == "RedHat" 
+         - ansible_distribution == "CentOs"
+
+    - name: install apache2 package
+      dnf:
+        name: httpd
+        state: latest
+      when:
+         - ansible_os_family == "RedHat"
+         - ansible_distribution == "CentOs"
+
+    - name: add php support for package
+      yum:
+        name: php
+        state: latest
+      when:
+        - ansible_os_family == "RedHat" 
+        - ansible_distribution == "CentOs"
 
