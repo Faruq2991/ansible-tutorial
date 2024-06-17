@@ -5,19 +5,49 @@
   become_user: root
   gather_facts: yes
   tasks:
-    - name: install updates (CentOS)
+    - name: update repo (CentOS)
       tags: always
       dnf:
-        update_only: yes
         update_cache: yes
+      changed_when: false
       when: ansible_distribution == "CentOS"
 
-    - name: install updates (Ubuntu)
+    - name: update repo (Ubuntu)
       tags: always
       apt:
-        upgrade: dist
         update_cache: yes
+      changed_when: false
       when: ansible_distribution == "Ubuntu"
+
+- hosts: all
+  become: true
+  tasks:
+    
+
+    - name: add ssh key for simone
+      tags: always
+      authorized_key: 
+        user: simone
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGA2phHTDYGxKU0ddzKdJbrSRkdECrRyFg45fGvtyqGh ansible"
+
+
+- hosts: workstation
+  become: true
+  become_method: sudo
+  become_user: root
+  tasks:
+    - name: install unzip
+      package: 
+        name: unzip
+
+    - name: install terraform
+      unarchive: 
+        src: https://releases.hashicorp.com/terraform/1.8.5/terraform_1.8.5_linux_amd64.zip
+        dest: /usr/local/bin
+        remote_src: yes
+        mode: 0755
+        owner: root
+        group: root
 
 
 - hosts: web_servers
@@ -42,6 +72,30 @@
           - php
         state: latest
       when: ansible_distribution == "CentOS"
+
+
+    - name: start httpd service (CentOS)
+      tags: apache,apache2,httpd
+      service: 
+        name: httpd
+        state: started
+      when: ansible_distribution == "CentOS"
+
+    - name: change e-mail address for admin
+      tags: apache,centos,httpd
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^ServerAdmin'
+        line: ServerAdmin faruqadam.92@gmail.com 
+      when: ansible_distribution == "centOS"
+      register: httpd
+
+    - name: restart httpd (CentOS)
+      tags: apache,httpd,centos
+      service: 
+        name: httpd
+        state: restarted
+      when: httpd.changed
 
     - name: copy default html file for site
       tags: apache,apache2,httpd
